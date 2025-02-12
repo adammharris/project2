@@ -56,11 +56,32 @@ def conquer(left_half: list[tuple[float, float]], right_half: list[tuple[float, 
     
     # Find upper tangent in O(n) time
     upper_tangent = starting_points
-    # for key, point in enumerate(left_half):
 
+    for key,point in enumerate(left_half):
+        if point[1] > upper_tangent[0][1]:
+            left_half.remove(upper_tangent[0])
+            upper_tangent[0] = point
+    
+    for key, point in enumerate(right_half):
+        if point[1] > upper_tangent[1][1]:
+            right_half.remove(upper_tangent[1])
+            upper_tangent[1] = point
+    
+    lower_tangent = starting_points
 
-    # Find upper tangent and lower tangent in O(n) time
-    upper_tangent: tuple[tuple[float, float], tuple[float, float]] = tuple[rightmost, leftmost]
-    counterwise_rightmost = left_half
+    for key, point in enumerate(left_half):
+        if point[1] < lower_tangent[0][1]:
+            left_half.remove(lower_tangent[0])
+            lower_tangent[0] = point
+    
+    for key,point in enumerate(right_half):
+        if point[1] < lower_tangent[1][1]:
+            right_half.remove(lower_tangent[1])
+            lower_tangent[1] = point
+
+    hull = left_half.extend(right_half)
+    return hull
+
+    
 
 
