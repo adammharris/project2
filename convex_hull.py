@@ -1,7 +1,7 @@
 # Uncomment this line to import some functions that can help
 # you debug your algorithm
 # from plotting import draw_line, draw_hull, circle_point
-import math, random
+import math, random, itertools
 
 def compute_hull(points: list[tuple[float, float]]) -> list[tuple[float, float]]:
     """Return the subset of provided points that define the convex hull"""
@@ -17,8 +17,8 @@ def divide(points: list[tuple[float, float]]) -> list[tuple[float, float]]:
     if len(points) <= 3:
         return points
     midpoint = len(points) // 2
-    left_half = points[:midpoint]
-    right_half = points[midpoint:]
+    left_half = points[:midpoint].copy()
+    right_half = points[midpoint:].copy()
 
     # Recursively divide into smaller pieces in O(logn) time
     if len(left_half) > 3:
@@ -66,6 +66,7 @@ def conquer(left_half: list[tuple[float, float]], right_half: list[tuple[float, 
             lower_tangent[1] = point
 
     # Delete contained points from hull 
+    #hull = list(itertools.chain(left_half, right_half))
     test_point = clockwise(left_half, upper_tangent[0])
     while test_point != lower_tangent[0]:
         next_point = clockwise(left_half, test_point)
@@ -78,7 +79,7 @@ def conquer(left_half: list[tuple[float, float]], right_half: list[tuple[float, 
         right_half.remove(test_point)
         test_point = next_point
 
-    hull = left_half.extend(right_half)
+    hull = list(itertools.chain(left_half, right_half))
     return hull
 
 def clockwise(points: list[tuple[float, float]], point: tuple[float, float], counter=False) -> tuple[float, float]:
