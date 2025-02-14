@@ -85,17 +85,22 @@ def is_below(p1, p2, p):
 def combine_hulls(left_half, right_half, upper_tangent, lower_tangent):
     hull = []
     
+    # traverse left hull from upper tangent to lower in O(n) time
     index = left_half.index(upper_tangent[0])
-    while left_half[index] != lower_tangent[0]:
+    start_index = index
+    while True:
         circle_point(left_half[index])
         hull.append(left_half[index])
-        index = (index - 1) % len(left_half)
-    hull.append(lower_tangent[0])
+        if left_half[index] == lower_tangent[0]:
+            break
+        index = (index + 1) % len(left_half)
 
+    # traverse right hull from lower tangent to upper in O(n) time
     index = right_half.index(lower_tangent[1])
-    while right_half[index] != upper_tangent[1]:
+    while True:
         circle_point(right_half[index])
         hull.append(right_half[index])
+        if right_half[index] == upper_tangent[1]:
+            break
         index = (index - 1) % len(right_half)
-    hull.append(upper_tangent[1])
     return hull
