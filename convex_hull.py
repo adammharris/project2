@@ -42,26 +42,8 @@ def conquer(left_half: list[tuple[float, float]], right_half: list[tuple[float, 
             starting_points[1] = point
 
     
-    # Find upper tangent in O(n) time
-    upper_tangent = starting_points.copy()
-
-    for key,point in enumerate(left_half):
-        if point[1] > upper_tangent[0][1]:
-            upper_tangent[0] = point
-    
-    for key, point in enumerate(right_half):
-        if point[1] > upper_tangent[1][1]:
-            upper_tangent[1] = point
-    
-    lower_tangent = starting_points.copy()
-
-    for key, point in enumerate(left_half):
-        if point[1] < lower_tangent[0][1]:
-            lower_tangent[0] = point
-    
-    for key,point in enumerate(right_half):
-        if point[1] < lower_tangent[1][1]:
-            lower_tangent[1] = point
+    upper_tangent = find_tangent(left_half, right_half, starting_points)
+    lower_tangent = find_tangent(left_half, right_half, starting_points, False)
 
     draw_line(lower_tangent[0], lower_tangent[1])
     draw_line(upper_tangent[0], upper_tangent[1])
@@ -85,4 +67,22 @@ def conquer(left_half: list[tuple[float, float]], right_half: list[tuple[float, 
     draw_hull(hull)
     return hull
 
+def find_tangent(left_half, right_half, starting_points, is_upper=True):
+    # Find upper tangent in O(n) time
+    tangent = starting_points.copy()
+    for key,point in enumerate(left_half):
+        if is_upper:
+            if point[1] > tangent[0][1]:
+                tangent[0] = point
+        else:
+            if point[1] < tangent[0][1]:
+                tangent[0] = point
 
+    for key,point in enumerate(right_half):
+        if is_upper:
+            if point[1] > tangent[1][1]:
+                tangent[1] = point
+        else:
+            if point[1] < tangent[1][1]:
+                tangent[1] = point
+    return tangent
