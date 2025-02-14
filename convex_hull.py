@@ -1,24 +1,20 @@
 # Uncomment this line to import some functions that can help
 # you debug your algorithm
-# from plotting import draw_line, draw_hull, circle_point
+from plotting import draw_line, draw_hull, circle_point
 import math, random, itertools
 
 def compute_hull(points: list[tuple[float, float]]) -> list[tuple[float, float]]:
     """Return the subset of provided points that define the convex hull"""
-
     # Sorting algorithm: O(nlogn) time
-    pivot: tuple[float, float] = max(points, key=lambda p: (p[0], p[1]))
-    points.sort(key=lambda p: math.atan2(p[1] - pivot[1], p[0] - pivot[0]), reverse=True)
-
-    return divide(points)
+    return divide(sorted(points))
 
 def divide(points: list[tuple[float, float]]) -> list[tuple[float, float]]:
     # Divide list into two parts in O(1) time
     if len(points) <= 3:
         return points
     midpoint = len(points) // 2
-    left_half = points[:midpoint].copy()
-    right_half = points[midpoint:].copy()
+    left_half = points[:midpoint]
+    right_half = points[midpoint:]
 
     # Recursively divide into smaller pieces in O(logn) time
     if len(left_half) > 3:
@@ -32,6 +28,8 @@ def divide(points: list[tuple[float, float]]) -> list[tuple[float, float]]:
 def conquer(left_half: list[tuple[float, float]], right_half: list[tuple[float, float]]) -> list[tuple[float, float]]:
 
     starting_points: list[tuple[float, float], tuple[float, float]] = [random.choice(left_half), random.choice(right_half)]
+    draw_hull(left_half)
+    draw_hull(right_half)
     
     # Find rightmost in left half in O(n) time
     for key, point in enumerate(left_half):
@@ -65,43 +63,26 @@ def conquer(left_half: list[tuple[float, float]], right_half: list[tuple[float, 
         if point[1] < lower_tangent[1][1]:
             lower_tangent[1] = point
 
+    draw_line(lower_tangent[0], lower_tangent[1])
+    draw_line(upper_tangent[0], upper_tangent[1])
     # Delete contained points from hull 
-    #hull = list(itertools.chain(left_half, right_half))
-    test_point = clockwise(left_half, upper_tangent[0])
-    while test_point != lower_tangent[0]:
-        next_point = clockwise(left_half, test_point)
-        left_half.remove(test_point)
-        test_point = next_point
-
-    test_point = clockwise(right_half, upper_tangent[1], True)
-    while test_point != lower_tangent[1]:
-        next_point = clockwise(right_half, test_point, True)
-        right_half.remove(test_point)
-        test_point = next_point
-
     hull = list(itertools.chain(left_half, right_half))
-    return hull
 
-def clockwise(points: list[tuple[float, float]], point: tuple[float, float], counter=False) -> tuple[float, float]:
-    clockwise_point: tuple[float, float]
-    index: int
-    try:
-        index = points.index(point)
-    except:
-        raise ValueError
-    
-    try:
-        if counter:
-            clockwise_point = points[index - 1]
-        else:
-            clockwise_point = points[index + 1]
-    except:
-        if counter:
-            clockwise_point = points[-1]
-        else:
-            clockwise_point = points[0]
-    
-    return clockwise_point
-    
+    current_index = (left_half.index(upper_tangent[0]) + 1) % len(left_half)
+    while left_half[current_index] != lower_tangent[0]:
+        next_index = current_index + 1 % len(left_half)
+        circle_point(left_half[current_index])
+        hull.remove(left_half[current_index])
+        current_index = next_index
+
+    current_index = (right_half.index(upper_tangent[1]) - 1) % len(right_half)
+    while right_half[current_index] != lower_tangent[1]:
+        next_index = current_index - 1 % len(right_half)
+        circle_point(right_half[current_index])
+        hull.remove(right_half[current_index])
+        current_index = next_index
+
+    draw_hull(hull)
+    return hull
 
 
