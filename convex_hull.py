@@ -1,11 +1,12 @@
 # Uncomment this line to import some functions that can help
 # you debug your algorithm
-from plotting import draw_line, draw_hull, circle_point
+# from plotting import draw_line, draw_hull, circle_point
 
 def compute_hull(points: list[tuple[float, float]]) -> list[tuple[float, float]]:
     """Return the subset of provided points that define the convex hull"""
     # Sorting algorithm: O(nlogn) time
-    return divide(sorted(points))
+    points.sort()
+    return divide(points)
 
 def slope(p1, p2):
     x1, y1 = p1
@@ -62,13 +63,9 @@ def conquer(left_half: list[tuple[float, float]], right_half: list[tuple[float, 
     upper_tangent = find_tangent(left_half, right_half, starting_points, True)
     lower_tangent = find_tangent(left_half, right_half, starting_points, False)
 
-    # draw_line(left_half[upper_tangent[0]], right_half[upper_tangent[1]])
-    # draw_line(left_half[lower_tangent[0]], right_half[lower_tangent[1]])
-
     # Combine hulls in O(n) time
     hull = combine_hulls(left_half, right_half, upper_tangent, lower_tangent)
 
-    # draw_hull(hull)
     return hull
 
 def find_tangent(left_half, right_half, starting_points, is_upper):
@@ -120,22 +117,24 @@ def combine_hulls(left_half, right_half, upper_tangent, lower_tangent):
     
     index = 0  # Track insertion index
 
-    # Traverse left hull from lower tangent to upper tangent
+    # Start at right lower tangent
     i = lower_tangent[0]
+    # Iterate until right upper tangent
     while i != upper_tangent[0]:
         hull[index] = left_half[i]
         index += 1
         i = (i + 1) % len(left_half)  # Move clockwise
-    hull[index] = left_half[i]  # Add last point
+    hull[index] = left_half[i]
     index += 1
 
-    # Traverse right hull from upper tangent to lower tangent
+    # Start at left upper tangent
     i = upper_tangent[1]
+    # Iterate until left lower tangent
     while i != lower_tangent[1]:
         hull[index] = right_half[i]
         index += 1
         i = (i + 1) % len(right_half)  # Move clockwise
-    hull[index] = right_half[i]  # Add last point
+    hull[index] = right_half[i]
     index += 1
 
     # Return only the used portion of the preallocated list
