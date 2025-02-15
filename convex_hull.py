@@ -83,24 +83,16 @@ def is_below(p1, p2, p):
     return (p2[0] - p1[0]) * (p[1] - p1[1]) - (p2[1] - p1[1]) * (p[0] - p1[0]) < 0
 
 def combine_hulls(left_half, right_half, upper_tangent, lower_tangent):
-    hull = []
-    
-    # traverse left hull from upper tangent to lower in O(n) time
-    index = left_half.index(upper_tangent[0])
-    start_index = index
-    while True:
-        circle_point(left_half[index])
-        hull.append(left_half[index])
-        if left_half[index] == lower_tangent[0]:
-            break
-        index = (index + 1) % len(left_half)
+    points = left_half + right_half
+    final = []
+    for p in points:
+        # While there are at least two points in the final list and the last three 
+        # points do not make a counter-clockwise turn, remove the middle point.
+        while len(final) >= 2 and cross(final[-2], final[-1], p) <= 0:
+            final.pop()
+        final.append(p)
+    return final
 
-    # traverse right hull from lower tangent to upper in O(n) time
-    index = right_half.index(lower_tangent[1])
-    while True:
-        circle_point(right_half[index])
-        hull.append(right_half[index])
-        if right_half[index] == upper_tangent[1]:
-            break
-        index = (index - 1) % len(right_half)
-    return hull
+def cross(o, a, b):
+    """Compute the cross product of OA and OB (positive if counter-clockwise turn)."""
+    return (a[0]-o[0])*(b[1]-o[1]) - (a[1]-o[1])*(b[0]-o[0])
