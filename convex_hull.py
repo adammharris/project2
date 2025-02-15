@@ -1,13 +1,10 @@
 # Uncomment this line to import some functions that can help
 # you debug your algorithm
 from plotting import draw_line, draw_hull, circle_point
-import math, random, itertools
 
 def compute_hull(points: list[tuple[float, float]]) -> list[tuple[float, float]]:
     """Return the subset of provided points that define the convex hull"""
     # Sorting algorithm: O(nlogn) time
-    #left_half = sort_points(left_half)
-    #right_half = sort_points(right_half)
     return divide(sorted(points))
 
 def slope(p1, p2):
@@ -25,7 +22,7 @@ def divide(points: list[tuple[float, float]]) -> list[tuple[float, float]]:
     left_half = points[:midpoint]
     right_half = points[midpoint:]
 
-    # Recursively divide into smaller pieces in O(logn) time
+    
     def sort3(half):
         half.sort()
         p1, p2, p3 = half
@@ -36,9 +33,11 @@ def divide(points: list[tuple[float, float]]) -> list[tuple[float, float]]:
         else:
             return [p1, p3, p2]
     
+    # Recursively divide into smaller pieces in O(logn) time
     if len(left_half) > 3:
         left_half = divide(left_half)
     else:
+        # Simple, constant time sorting
         if len(left_half) == 3:
             left_half = sort3(left_half)
         elif len(left_half) < 3:
@@ -46,6 +45,7 @@ def divide(points: list[tuple[float, float]]) -> list[tuple[float, float]]:
     if len(right_half) > 3:
         right_half = divide(right_half)
     else:
+        # Simple, constant time sorting
         if len(right_half) == 3:
             right_half = sort3(right_half)
         elif len(right_half) < 3:
@@ -55,27 +55,24 @@ def divide(points: list[tuple[float, float]]) -> list[tuple[float, float]]:
     return conquer(left_half, right_half)
 
 def conquer(left_half: list[tuple[float, float]], right_half: list[tuple[float, float]]) -> list[tuple[float, float]]:
-
-    starting_points: list[tuple[float, float], tuple[float, float]] = [random.choice(left_half), random.choice(right_half)]
-    draw_hull(left_half)
-    draw_hull(right_half)
-    
     # Find rightmost point of left hull and leftmost point of right hull in O(n) time
     starting_points = [left_half.index(max(left_half, key=lambda p: p[0])), right_half.index(min(right_half, key=lambda p: p[0]))]
 
+    # Find tangent lines in O(n) time
     upper_tangent = find_tangent(left_half, right_half, starting_points, True)
     lower_tangent = find_tangent(left_half, right_half, starting_points, False)
 
-    draw_line(left_half[upper_tangent[0]], right_half[upper_tangent[1]])
-    draw_line(left_half[lower_tangent[0]], right_half[lower_tangent[1]])
+    # draw_line(left_half[upper_tangent[0]], right_half[upper_tangent[1]])
+    # draw_line(left_half[lower_tangent[0]], right_half[lower_tangent[1]])
 
-    # Delete contained points from hull 
+    # Combine hulls in O(n) time
     hull = combine_hulls(left_half, right_half, upper_tangent, lower_tangent)
 
-    draw_hull(hull)
+    # draw_hull(hull)
     return hull
 
 def find_tangent(left_half, right_half, starting_points, is_upper):
+    # Find tangent line in O(n) time
     left_tangent = starting_points[0]
     right_tangent = starting_points[1]
 
@@ -123,6 +120,7 @@ def is_below(p1, p2, p):
     return (p2[0] - p1[0]) * (p[1] - p1[1]) - (p2[1] - p1[1]) * (p[0] - p1[0]) < 0
 
 def combine_hulls(left_half, right_half, upper_tangent, lower_tangent):
+    # Find hull in O(n) time
     hull = []
     
     # Start at left lower tangent
