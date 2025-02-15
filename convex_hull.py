@@ -104,42 +104,39 @@ def find_tangent(left_half, right_half, starting_points, is_upper):
 
     return [left_tangent, right_tangent]
 
-def is_above(p1, p2, p):
-    x1, y1 = p1
-    x2, y2 = p2
-    x, y = p
+def orientation(p, q, r):
+    """Returns positive if counterclockwise, negative if clockwise, and 0 if collinear"""
+    return (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0])
 
-    if x1 == x2:  # Vertical line
-        return x > x1  # Assuming "above" means to the right for a vertical line
-    else:
-        m = slope(p1, p2)
-        b = y1 - m * x1
-        return y > m * x + b
+def is_above(p1, p2, p):
+    return orientation(p1, p2, p) > 0
 
 def is_below(p1, p2, p):
-    return (p2[0] - p1[0]) * (p[1] - p1[1]) - (p2[1] - p1[1]) * (p[0] - p1[0]) < 0
+    return orientation(p1, p2, p) < 0
 
 def combine_hulls(left_half, right_half, upper_tangent, lower_tangent):
-    # Find hull in O(n) time
-    hull = []
+    hull_size = len(left_half) + len(right_half)
+    hull = [None] * hull_size  # Preallocate list
     
-    # Start at left lower tangent
-    index = lower_tangent[0]
-    while index != upper_tangent[0]:
-        circle_point(left_half[index])
-        hull.append(left_half[index])
-        # circle clockwise
-        index = (index + 1) % len(left_half)
-        # until we reach the left upper tangent
-    hull.append(left_half[index])
+    index = 0  # Track insertion index
 
-    # Start at the right upper tangent
-    index = upper_tangent[1]
-    while index != lower_tangent[1]:
-        circle_point(right_half[index])
-        hull.append(right_half[index])
-        # circle clockwise
-        index = (index + 1) % len(right_half)
-        # until we reach the right lower tangent
-    hull.append(right_half[index])
-    return hull
+    # Traverse left hull from lower tangent to upper tangent
+    i = lower_tangent[0]
+    while i != upper_tangent[0]:
+        hull[index] = left_half[i]
+        index += 1
+        i = (i + 1) % len(left_half)  # Move clockwise
+    hull[index] = left_half[i]  # Add last point
+    index += 1
+
+    # Traverse right hull from upper tangent to lower tangent
+    i = upper_tangent[1]
+    while i != lower_tangent[1]:
+        hull[index] = right_half[i]
+        index += 1
+        i = (i + 1) % len(right_half)  # Move clockwise
+    hull[index] = right_half[i]  # Add last point
+    index += 1
+
+    # Return only the used portion of the preallocated list
+    return hull[:index]  # Slice to remove unused `None` values
